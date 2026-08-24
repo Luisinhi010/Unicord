@@ -1,58 +1,53 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4"
   xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap4 uap5 mp rescap">
+  IgnorableNamespaces="uap uap4 uap5 rescap">
 
-	<Identity Name="24101WamWooWamRD.UnicordCanary"
-			  Publisher="CN=0F22111D-EDF0-42F0-B58D-26C4C5C5054B"
-			  Version="2.0.3.0" />
+  <Identity Name="24101WamWooWamRD.UnicordCanary"
+            Publisher="CN=0F22111D-EDF0-42F0-B58D-26C4C5C5054B"
+            Version="2.0.3.0" />
 
-	<mp:PhoneIdentity PhoneProductId="e8adef53-9a75-41ce-88eb-b971a1ee9d57"
-					  PhonePublisherId="0F22111D-EDF0-42F0-B58D-26C4C5C5054B" />
+  <Properties>
+    <DisplayName>ms-resource:DevAppDisplayName</DisplayName>
+    <PublisherDisplayName>Wan Kerr Co. Ltd.</PublisherDisplayName>
+    <Logo>Assets\Store\StoreLogo.png</Logo>
+  </Properties>
 
-	<Properties>
-		<DisplayName>ms-resource:DevAppDisplayName</DisplayName>
-		<PublisherDisplayName>Wan Kerr Co. Ltd.</PublisherDisplayName>
-		<Logo>Assets\Store\StoreLogo.png</Logo>
-	</Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
 
-	<Dependencies>
-		<TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.15063.0" MaxVersionTested="10.0.26100.0" />
-    <TargetDeviceFamily Name="Windows.Mobile" MinVersion="10.0.15063.0" MaxVersionTested="10.0.15254.0"/>
-	</Dependencies>
+  <Resources>
+    <Resource Language="x-generate"/>
+  </Resources>
 
-	<Resources>
-		<Resource Language="x-generate"/>
-	</Resources>
-
-	<Applications>
-		<Application Id="App"
-		  Executable="$targetnametoken$.exe"
-		  EntryPoint="Unicord.Universal.App">
-			<uap:VisualElements
-			  DisplayName="ms-resource:DevAppDisplayName"
-			  Square150x150Logo="Assets\Store\Square150x150Logo.png"
-			  Square44x44Logo="Assets\Store\Square44x44Logo.png"
-			  Description="Unicord.Universal"
-			  BackgroundColor="transparent">
-				<uap:DefaultTile Wide310x150Logo="Assets\Store\Wide310x150Logo.png"/>
-				<uap:SplashScreen Image="Assets\Store\SplashScreen.png" uap5:Optional="true" />
-				<uap:LockScreen Notification="badge" BadgeLogo="Assets\Store\BadgeLogo.png"/>
-			</uap:VisualElements>
-			<Extensions>
+  <Applications>
+    <Application Id="App"
+      Executable="$targetnametoken$.exe"
+      EntryPoint="Unicord.Universal.App">
+      <uap:VisualElements
+        DisplayName="ms-resource:DevAppDisplayName"
+        Square150x150Logo="Assets\Store\Square150x150Logo.png"
+        Square44x44Logo="Assets\Store\Square44x44Logo.png"
+        Description="Unicord.Universal"
+        BackgroundColor="transparent">
+        <uap:DefaultTile Wide310x150Logo="Assets\Store\Wide310x150Logo.png"/>
+        <uap:SplashScreen Image="Assets\Store\SplashScreen.png" uap5:Optional="true" />
+        <uap:LockScreen Notification="badge" BadgeLogo="Assets\Store\BadgeLogo.png"/>
+      </uap:VisualElements>
+      <Extensions>
         <Extension Category="windows.backgroundTasks" EntryPoint="Unicord.Universal.Background.Tasks.PeriodicNotificationsTask">
           <BackgroundTasks>
             <Task Type="general"/>
             <Task Type="timer"/>
           </BackgroundTasks>
         </Extension>
-        
+
         <Extension Category="windows.backgroundTasks" EntryPoint="Unicord.Universal.Background.Tasks.RealtimeNotificationsTask">
           <BackgroundTasks>
             <Task Type="general"/>
@@ -60,72 +55,71 @@
             <Task Type="pushNotification"/>
           </BackgroundTasks>
         </Extension>
-        
-				<uap:Extension Category="windows.shareTarget">
-					<uap:ShareTarget Description="Share to Discord">
-						<uap:SupportedFileTypes>
-							<uap:SupportsAnyFileType />
-						</uap:SupportedFileTypes>
-						<uap:DataFormat>StorageItem</uap:DataFormat>
-						<uap:DataFormat>Bitmap</uap:DataFormat>
-						<uap:DataFormat>Text</uap:DataFormat>
-						<uap:DataFormat>WebLink</uap:DataFormat>
-					</uap:ShareTarget>
-				</uap:Extension>
-        
+
+        <uap:Extension Category="windows.shareTarget">
+          <uap:ShareTarget Description="Share to Discord">
+            <uap:SupportedFileTypes>
+              <uap:SupportsAnyFileType />
+            </uap:SupportedFileTypes>
+            <uap:DataFormat>StorageItem</uap:DataFormat>
+            <uap:DataFormat>Bitmap</uap:DataFormat>
+            <uap:DataFormat>Text</uap:DataFormat>
+            <uap:DataFormat>WebLink</uap:DataFormat>
+          </uap:ShareTarget>
+        </uap:Extension>
+
         <uap4:Extension Category="windows.contactPanel" />
 
-				<uap:Extension Category="windows.protocol">
-					<uap:Protocol Name="ms-contact-profile">
-						<uap:Logo>Assets\Store\Square44x44Logo.png</uap:Logo>
-						<uap:DisplayName>Unicord</uap:DisplayName>
-					</uap:Protocol>
-				</uap:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="ms-contact-profile">
+            <uap:Logo>Assets\Store\Square44x44Logo.png</uap:Logo>
+            <uap:DisplayName>Unicord</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
 
-				<uap:Extension Category="windows.protocol">
-					<uap:Protocol Name="ms-ipmessaging">
-						<uap:Logo>Assets\Store\Square44x44Logo.png</uap:Logo>
-						<uap:DisplayName>Unicord</uap:DisplayName>
-					</uap:Protocol>
-				</uap:Extension>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="ms-ipmessaging">
+            <uap:Logo>Assets\Store\Square44x44Logo.png</uap:Logo>
+            <uap:DisplayName>Unicord</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
 
-				<!-- voice background tasks -->
-				<uap:Extension Category="windows.voipCall"/>
-				<uap:Extension Category="windows.appService" EntryPoint="Unicord.Universal.Voice.Background.ServiceBackgroundTask">
-					<uap:AppService Name="com.wankerr.Unicord.Voice" ServerName="Unicord.Universal.Voice.Background.ServiceBackgroundTask" />
-				</uap:Extension>
-				<Extension Category="windows.backgroundTasks" EntryPoint="Unicord.Universal.Voice.Background.VoiceBackgroundTask">
-					<BackgroundTasks ServerName="Unicord.Universal.Voice.Background.ServiceBackgroundTask">
-						<Task Type="general"/>
-						<Task Type="systemEvent" />
-					</BackgroundTasks>
-				</Extension>
-			</Extensions>
-		</Application>
-	</Applications>
+        <uap:Extension Category="windows.voipCall"/>
+        <uap:Extension Category="windows.appService" EntryPoint="Unicord.Universal.Voice.Background.ServiceBackgroundTask">
+          <uap:AppService Name="com.wankerr.Unicord.Voice" ServerName="Unicord.Universal.Voice.Background.ServiceBackgroundTask" />
+        </uap:Extension>
+        <Extension Category="windows.backgroundTasks" EntryPoint="Unicord.Universal.Voice.Background.VoiceBackgroundTask">
+          <BackgroundTasks ServerName="Unicord.Universal.Voice.Background.ServiceBackgroundTask">
+            <Task Type="general"/>
+            <Task Type="systemEvent" />
+          </BackgroundTasks>
+        </Extension>
+      </Extensions>
+    </Application>
+  </Applications>
 
-	<Capabilities>
-		<Capability Name="internetClient" />
-		<uap:Capability Name="videosLibrary" />
-		<uap:Capability Name="picturesLibrary" />
-		<uap:Capability Name="contacts" />
-		<uap:Capability Name="voipCall" />
-		<uap:Capability Name="phoneCall" />
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <uap:Capability Name="videosLibrary" />
+    <uap:Capability Name="picturesLibrary" />
+    <uap:Capability Name="contacts" />
+    <uap:Capability Name="voipCall" />
+    <uap:Capability Name="phoneCall" />
     <rescap:Capability Name="extendedBackgroundTaskTime"/>
     <DeviceCapability Name="microphone" />
     <DeviceCapability Name="webcam" />
-	</Capabilities>
+  </Capabilities>
 
-	<Extensions>
-		<Extension Category="windows.activatableClass.inProcessServer">
-			<InProcessServer>
-				<Path>Unicord.Universal.Voice.dll</Path>
-				<ActivatableClass ActivatableClassId="Unicord.Universal.Voice.VoiceClientStats" ThreadingModel="both"/>
-				<ActivatableClass ActivatableClassId="Unicord.Universal.Voice.VoiceClientOptions" ThreadingModel="both"/>
-				<ActivatableClass ActivatableClassId="Unicord.Universal.Voice.VoiceClient" ThreadingModel="both"/>
-				<ActivatableClass ActivatableClassId="Unicord.Universal.Voice.Background.VoiceBackgroundTask" ThreadingModel="both"/>
-				<ActivatableClass ActivatableClassId="Unicord.Universal.Voice.Background.ServiceBackgroundTask" ThreadingModel="both"/>
-			</InProcessServer>
-		</Extension>
-	</Extensions>
+  <Extensions>
+    <Extension Category="windows.activatableClass.inProcessServer">
+      <InProcessServer>
+        <Path>Unicord.Universal.Voice.dll</Path>
+        <ActivatableClass ActivatableClassId="Unicord.Universal.Voice.VoiceClientStats" ThreadingModel="both"/>
+        <ActivatableClass ActivatableClassId="Unicord.Universal.Voice.VoiceClientOptions" ThreadingModel="both"/>
+        <ActivatableClass ActivatableClassId="Unicord.Universal.Voice.VoiceClient" ThreadingModel="both"/>
+        <ActivatableClass ActivatableClassId="Unicord.Universal.Voice.Background.VoiceBackgroundTask" ThreadingModel="both"/>
+        <ActivatableClass ActivatableClassId="Unicord.Universal.Voice.Background.ServiceBackgroundTask" ThreadingModel="both"/>
+      </InProcessServer>
+    </Extension>
+  </Extensions>
 </Package>

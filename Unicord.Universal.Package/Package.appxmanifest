@@ -1,39 +1,36 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
          xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2"
          xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
-				 xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4"
+         xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4"
          xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
          xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
-         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
-				 IgnorableNamespaces="uap mp uap2 uap3 uap4 uap5 rescap">
+         IgnorableNamespaces="uap uap2 uap3 uap4 uap5 rescap">
   <Identity Name="24101WamWooWamRD.Unicord" Publisher="CN=0F22111D-EDF0-42F0-B58D-26C4C5C5054B" Version="2.0.51.0" />
-  <mp:PhoneIdentity PhoneProductId="5783aabf-3049-421f-ae1d-e88bd89018f2" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>ms-resource:AppDisplayName</DisplayName>
     <PublisherDisplayName>Wan Kerr Co. Ltd.</PublisherDisplayName>
     <Logo>Assets\Store\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.15063.0" MaxVersionTested="10.0.26100.0" />
-    <TargetDeviceFamily Name="Windows.Mobile" MinVersion="10.0.15063.0" MaxVersionTested="10.0.15254.0"/>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
   </Dependencies>
   <Resources>
     <Resource Language="x-generate"/>
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Unicord.Universal.App">
-      <uap:VisualElements DisplayName="ms-resource:AppDisplayName" 
-                          Square150x150Logo="Assets\Store\Square150x150Logo.png" 
-                          Square44x44Logo="Assets\Store\Square44x44Logo.png" 
-                          Description="ms-resource:AppDisplayDescription" 
+      <uap:VisualElements DisplayName="ms-resource:AppDisplayName"
+                          Square150x150Logo="Assets\Store\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Store\Square44x44Logo.png"
+                          Description="ms-resource:AppDisplayDescription"
                           BackgroundColor="transparent">
         <uap:LockScreen Notification="badge" BadgeLogo="Assets\Store\BadgeLogo.png" />
-        <uap:DefaultTile Wide310x150Logo="Assets\Store\Wide310x150Logo.png" 
-                         Square310x310Logo="Assets\Store\LargeTile.png" 
-                         Square71x71Logo="Assets\Store\SmallTile.png" 
+        <uap:DefaultTile Wide310x150Logo="Assets\Store\Wide310x150Logo.png"
+                         Square310x310Logo="Assets\Store\LargeTile.png"
+                         Square71x71Logo="Assets\Store\SmallTile.png"
                          ShortName="Unicord">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo" />
@@ -111,8 +108,8 @@
           <uap:AppService Name="com.wankerr.Unicord.Notifications" />
         </uap:Extension>
         <uap5:Extension Category="windows.startupTask"
-						Executable="Unicord.Universal.Background/Unicord.Universal.Background.exe"
-						EntryPoint="Windows.FullTrustApplication">
+                        Executable="Unicord.Universal.Background/Unicord.Universal.Background.exe"
+                        EntryPoint="Windows.FullTrustApplication">
           <uap5:StartupTask
             TaskId="UnicordBackgroundTask"
             Enabled="false"
