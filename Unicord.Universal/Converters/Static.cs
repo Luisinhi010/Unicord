@@ -29,6 +29,9 @@ namespace Unicord.Universal.Converters
             => channel is DiscordDmChannel dm
                && dm.Recipients?.Any(IsOfficialDiscordSystemUser) == true;
 
+        public static bool CanUseMessageComposer(DiscordChannel channel)
+            => !IsOfficialDiscordSystemDm(channel);
+
         public static Visibility OfficialDiscordSafetyVisibility(DiscordChannel channel)
             => IsOfficialDiscordSystemDm(channel) ? Visibility.Visible : Visibility.Collapsed;
 
