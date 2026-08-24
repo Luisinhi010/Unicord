@@ -81,7 +81,9 @@ namespace Unicord.Universal.Controls.Markdown.Render
                 FontStyle = FontStyle,
                 FontWeight = FontWeight,
                 Foreground = localContext.Foreground,
-                IsTextSelectionEnabled = IsTextSelectionEnabled,
+                // Desktop QoL: let the enclosing message own right-click behavior instead of
+                // RichTextBlock showing its built-in "Copy all" context menu.
+                IsTextSelectionEnabled = false,
                 TextWrapping = TextWrapping
             };
             localContext.BlockUIElementCollection?.Add(result);
@@ -104,7 +106,9 @@ namespace Unicord.Universal.Controls.Markdown.Render
                 FontStyle = FontStyle,
                 FontWeight = FontWeight,
                 Foreground = context.Foreground,
-                IsTextSelectionEnabled = IsTextSelectionEnabled,
+                // Keep markdown consistent with RichTextBlock above so M2 bubbles to the
+                // message-level ContextFlyout.
+                IsTextSelectionEnabled = false,
                 TextWrapping = TextWrapping
             };
             return result;
