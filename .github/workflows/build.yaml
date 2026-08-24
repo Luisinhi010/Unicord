@@ -35,7 +35,7 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Restore NuGet Packages
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x64
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=x64 /p:RuntimeIdentifier=win-x64
       env:
         Configuration: ${{ matrix.configuration }}
 
@@ -111,7 +111,7 @@ jobs:
         echo Done!
 
     - name: Build App Packages
-      run: msbuild $env:Solution_Name /t:Unicord_Universal_Package /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxBundlePlatforms="x64" /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=$env:PfxPassword /p:AppxPackageDir="$env:Appx_Package_Dir" /p:PackageCertificateThumbprint=$env:AppxThumbprint
+      run: msbuild $env:Solution_Name /t:Unicord_Universal_Package /p:Configuration=$env:Configuration /p:Platform=x64 /p:RuntimeIdentifier=win-x64 /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxBundlePlatforms="x64" /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=$env:PfxPassword /p:AppxPackageDir="$env:Appx_Package_Dir" /p:PackageCertificateThumbprint=$env:AppxThumbprint
       env:
         Appx_Bundle: Always
         Appx_Package_Build_Mode: SideloadOnly
