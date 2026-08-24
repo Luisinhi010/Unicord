@@ -155,7 +155,8 @@ namespace Unicord.Universal.Controls.Messages
                     Child = panel
                 };
 
-                Panel.SetZIndex(_quickActions, 100);
+                // Children added later in the Grid render above the earlier hover highlight,
+                // so no explicit z-index API is necessary (and Panel.SetZIndex is not UWP).
                 _messageSurface.Children.Add(_quickActions);
             }
         }
