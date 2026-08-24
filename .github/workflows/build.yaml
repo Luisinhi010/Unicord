@@ -1,12 +1,10 @@
-# This workflow will build, sign, and package a WinUI 3 MSIX desktop application
-# built on .NET.
+# This workflow will build, sign, and package Unicord for sideloading.
 
 name: Build
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ redesign ]
-  pull_request:
     branches: [ redesign ]
 
 jobs:
@@ -33,11 +31,9 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
-    # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore NuGet Packages
       run: |
         msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:RuntimeIdentifier=win-x86
@@ -46,21 +42,39 @@ jobs:
       env:
         Configuration: ${{ matrix.configuration }}
 
-    # - name: Build Background Task
-    #   run: |
-    #     msbuild $env:BackgroundProjectFile_Name /p:Configuration=$env:Configuration /p:TargetFramework=net472 /p:RuntimeIdentifier=win-x86
-    #     msbuild $env:BackgroundProjectFile_Name /p:Configuration=$env:Configuration /p:TargetFramework=net472 /p:RuntimeIdentifier=win-x64
-    #     msbuild $env:BackgroundProjectFile_Name /p:Configuration=$env:Configuration /p:TargetFramework=net472 /p:RuntimeIdentifier=win-arm
-    #   env:
-    #     Configuration: ${{ matrix.configuration }}
-
-    # Decode the base 64 encoded pfx and save the Signing_Certificate
-    - name: Load Certificate
+    - name: Create local signing certificate
+      shell: pwsh
       run: |
-        $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-        $certificatePath = "GitHubActionsWorkflow.pfx"
-        [IO.File]::WriteAllBytes("$env:Project_Name/$certificatePath", $pfx_cert_byte)
-        [IO.File]::WriteAllBytes("$env:Project_Name_2/$certificatePath", $pfx_cert_byte)
+        $publisher = 'CN=0F22111D-EDF0-42F0-B58D-26C4C5C5054B'
+        $password = [Guid]::NewGuid().ToString('N')
+        $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+
+        $cert = New-SelfSignedCertificate `
+          -Type Custom `
+          -Subject $publisher `
+          -KeyUsage DigitalSignature `
+          -CertStoreLocation 'Cert:\CurrentUser\My' `
+          -TextExtension @(
+            '2.5.29.37={text}1.3.6.1.5.5.7.3.3',
+            '2.5.29.19={text}'
+          ) `
+          -FriendlyName 'Unicord GitHub Actions Development Signing'
+
+        $packageDir = Join-Path $env:GITHUB_WORKSPACE $env:Project_Name
+        $appDir = Join-Path $env:GITHUB_WORKSPACE $env:Project_Name_2
+        $pfxPath = Join-Path $packageDir 'GitHubActionsWorkflow.pfx'
+        $cerPath = Join-Path $packageDir 'Unicord_LocalDev.cer'
+
+        Export-PfxCertificate -Cert $cert -FilePath $pfxPath -Password $securePassword | Out-Null
+        Export-Certificate -Cert $cert -FilePath $cerPath | Out-Null
+        Copy-Item $pfxPath (Join-Path $appDir 'GitHubActionsWorkflow.pfx') -Force
+
+        "AppxThumbprint=$($cert.Thumbprint)" >> $env:GITHUB_ENV
+        "PfxPassword=$password" >> $env:GITHUB_ENV
+
+        Write-Host "Created signing certificate: $($cert.Subject)"
+        Write-Host "Thumbprint: $($cert.Thumbprint)"
+        Write-Host "Valid until: $($cert.NotAfter)"
 
     - name: Adjust Package Version
       run: |
@@ -72,7 +86,6 @@ jobs:
         $nsmgr = [System.Xml.XmlNamespaceManager]::new($xml.NameTable)
         $nsmgr.AddNamespace("appx", $appx);
 
-        # adjust package version
         $node = $xml.GetElementsByTagName("Identity", $appx)[0]
         $version = [System.Version]::Parse($node.GetAttribute("Version"))
 
@@ -86,9 +99,8 @@ jobs:
         $xml.Save($file)
 
         echo "Appx_Bundle_Version=$($version.ToString())" >> $env:GITHUB_ENV
-      env: 
+      env:
         Appx_Bundle_Version: ''
-        # Version: ${{ matrix.version }}
         Version: ''
 
     - name: Install legacy SDK (10.0.22621.2428)
@@ -101,25 +113,29 @@ jobs:
         Wait-Process -Name "winsdksetup"
         echo Done!
 
-    # Create the app package by building and packaging the project
     - name: Build App Packages
-      run: msbuild $env:Solution_Name /t:Unicord_Universal_Package /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxBundlePlatforms="x86|x64|ARM" /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:AppxPackageDir="$env:Appx_Package_Dir" /p:PackageCertificateThumbprint=$env:AppxThumbprint
+      run: msbuild $env:Solution_Name /t:Unicord_Universal_Package /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxBundlePlatforms="x86|x64|ARM" /p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx /p:PackageCertificatePassword=$env:PfxPassword /p:AppxPackageDir="$env:Appx_Package_Dir" /p:PackageCertificateThumbprint=$env:AppxThumbprint
       env:
         Appx_Bundle: Always
         Appx_Package_Build_Mode: SideloadOnly
         Appx_Package_Dir: Packages\
         Configuration: ${{ matrix.configuration }}
-        AppxThumbprint: ${{ secrets.PFX_THUMBPRINT }}
 
-    # Remove the pfx
-    - name: Cleanup
-      run: Remove-Item -path Unicord.Universal.Package/GitHubActionsWorkflow.pfx
+    - name: Include public certificate in artifact
+      shell: pwsh
+      run: |
+        Copy-Item "$env:Project_Name\Unicord_LocalDev.cer" "$env:Project_Name\Packages\Unicord_LocalDev.cer" -Force
 
-    # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
+    - name: Cleanup private signing material
+      if: always()
+      shell: pwsh
+      run: |
+        Remove-Item "$env:Project_Name\GitHubActionsWorkflow.pfx" -ErrorAction SilentlyContinue
+        Remove-Item "$env:Project_Name_2\GitHubActionsWorkflow.pfx" -ErrorAction SilentlyContinue
+
     - name: Upload Appx Package
       uses: actions/upload-artifact@v4
       with:
-        # name: AppxPackage-${{ env.Appx_Bundle_Version }}-${{ matrix.configuration }}-${{ matrix.version }}
         name: AppxPackage-${{ env.Appx_Bundle_Version }}-${{ matrix.configuration }}
         path: |
-          ${{ env.Project_Name }}\\Packages
+          ${{ env.Project_Name }}\Packages
