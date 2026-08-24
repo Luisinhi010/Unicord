@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.EventArgs;
 using Unicord.Universal.Dialogs;
 using Unicord.Universal.Extensions;
 using Unicord.Universal.Services;
 using Unicord.Universal.Utilities;
-using Windows.Security.Credentials;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -25,28 +22,32 @@ namespace Unicord.Universal.Pages
             mainPage?.ShowConnectingOverlay();
 
             var dialog = new TokenDialog();
-            await dialog.ShowAsync();
+            var result = await dialog.ShowAsync();
 
-            if (!string.IsNullOrWhiteSpace(dialog.Token))
+            if (result == ContentDialogResult.Primary)
             {
-                await TryLoginAsync(dialog.Token);
+                var token = dialog.TakeToken();
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(token))
+                        await TryLoginAsync(token);
+                    else
+                        mainPage?.HideConnectingOverlay();
+                }
+                finally
+                {
+                    token = null;
+                }
             }
             else
             {
+                dialog.ClearCredential();
                 mainPage?.HideConnectingOverlay();
             }
         }
 
         private async Task TryLoginAsync(string token)
         {
-            Task OnReady(DiscordClient client, ReadyEventArgs e)
-            {
-                var vault = new PasswordVault();
-                vault.Add(new PasswordCredential(Constants.TOKEN_IDENTIFIER, "Default", token));
-
-                return Task.CompletedTask;
-            }
-
             var mainPage = this.FindParent<MainPage>();
 
             try
@@ -54,17 +55,20 @@ namespace Unicord.Universal.Pages
                 token = token.Trim('"').Trim();
 
                 if (string.IsNullOrWhiteSpace(token))
-                    throw new ArgumentException("Your token cannot be empty! If you were logging in via the browser, try using your token.");
+                    throw new ArgumentException("The credential cannot be empty.");
 
                 mainPage.ShowConnectingOverlay();
-                await DiscordManager.LoginAsync(token, OnReady, App.LoginError, false);
-
+                await DiscordManager.LoginAsync(token, null, App.LoginError, false);
                 Frame.Navigate(typeof(DiscordPage));
             }
             catch (Exception ex)
             {
                 await UIUtilities.ShowErrorDialogAsync("Failed to login!", ex.Message);
                 mainPage.HideConnectingOverlay();
+            }
+            finally
+            {
+                token = null;
             }
         }
 

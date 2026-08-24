@@ -9,7 +9,6 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Unicord.Universal.Shared;
 using Windows.ApplicationModel;
-using Windows.Storage;
 using Windows.Win32.Foundation;
 using static Windows.Win32.Graphics.Dwm.DWMWINDOWATTRIBUTE;
 using static Windows.Win32.PInvoke;
@@ -39,9 +38,15 @@ namespace Unicord.Universal.Background
         {
             Application.ApplicationExit += OnApplicationExit;
 
-            if (!TryGetToken(out _token))
+            // Never read the legacy plaintext LocalSettings token. The full-trust
+            // process is packaged with Unicord and uses the same Credential Locker
+            // resource as the UWP foreground process. If that access is unavailable,
+            // fail closed and simply do not start background Discord connectivity.
+            CredentialStore.DeleteLegacyPlaintextToken();
+            if (!CredentialStore.TryGetToken(out _token))
             {
                 ExitThread();
+                return;
             }
 
             _notifyIcon = new NotifyIcon();
@@ -74,7 +79,6 @@ namespace Unicord.Universal.Background
         {
             var osVersion = Environment.OSVersion.Version;
 
-            // Windows 10 1809 and later
             if (osVersion.Major < 10 || osVersion.Build < 17763)
                 return;
 
@@ -94,7 +98,7 @@ namespace Unicord.Universal.Background
             }
             catch
             {
-                // ignore this, it doesn't matter
+                // Cosmetic only.
             }
         }
 
@@ -108,7 +112,7 @@ namespace Unicord.Universal.Background
 
         private void OnCloseMenuItemClicked(object sender, EventArgs e)
         {
-            this.ExitThread();
+            ExitThread();
         }
 
         private async Task InitialiseAsync()
@@ -138,15 +142,31 @@ namespace Unicord.Universal.Background
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
-                this.ExitThread();
+                Debug.WriteLine(ex.GetType().FullName);
+                ExitThread();
             }
         }
 
         private void OnApplicationExit(object sender, EventArgs e)
         {
-            if (_discord != null)
-                _discord.DisconnectAsync().GetAwaiter().GetResult();
+            try
+            {
+                if (_discord != null)
+                {
+                    _discord.DisconnectAsync().GetAwaiter().GetResult();
+                    _discord.Dispose();
+                }
+            }
+            catch
+            {
+                // Process is exiting; do not persist diagnostic details that could
+                // accidentally include request/authentication context.
+            }
+            finally
+            {
+                _discord = null;
+                _token = null;
+            }
 
             if (_notifyIcon != null)
             {
@@ -159,7 +179,6 @@ namespace Unicord.Universal.Background
         {
             await _tileManager.InitialiseAsync();
             _badgeManager.Update();
-
             _ = Task.Run(GCTask);
         }
 
@@ -193,7 +212,7 @@ namespace Unicord.Universal.Background
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Debug.WriteLine(ex.GetType().FullName);
             }
         }
 
@@ -202,13 +221,11 @@ namespace Unicord.Universal.Background
             try
             {
                 if (NotificationUtils.WillShowToast(client, e.Message))
-                {
                     _toastManager?.HandleMessageUpdated(client, e.Message);
-                }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Debug.WriteLine(ex.GetType().FullName);
             }
 
             return Task.CompletedTask;
@@ -229,30 +246,8 @@ namespace Unicord.Universal.Background
             }
             catch (Exception ex)
             {
-                // TODO: log
-                Debug.WriteLine(ex);
+                Debug.WriteLine(ex.GetType().FullName);
             }
-        }
-
-        private bool TryGetToken(out string token)
-        {
-#if DEBUG // for testing
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length == 2)
-            {
-                token = args[1];
-                return true;
-            }
-#endif
-
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue("Token", out var s))
-            {
-                token = (string)s;
-                return true;
-            }
-
-            token = null;
-            return false;
         }
     }
 }
