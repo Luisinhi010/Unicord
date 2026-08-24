@@ -2,15 +2,20 @@
 
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:uap4="http://schemas.microsoft.com/appx/manifest/uap/windows10/4"
   xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap4 uap5 rescap">
+  IgnorableNamespaces="uap uap4 uap5 mp rescap">
 
   <Identity Name="24101WamWooWamRD.UnicordCanary"
             Publisher="CN=0F22111D-EDF0-42F0-B58D-26C4C5C5054B"
             Version="2.0.3.0" />
+
+  <!-- Required by the legacy UWP packaging toolchain even for desktop-only packages. -->
+  <mp:PhoneIdentity PhoneProductId="e8adef53-9a75-41ce-88eb-b971a1ee9d57"
+                    PhonePublisherId="0F22111D-EDF0-42F0-B58D-26C4C5C5054B" />
 
   <Properties>
     <DisplayName>ms-resource:DevAppDisplayName</DisplayName>
