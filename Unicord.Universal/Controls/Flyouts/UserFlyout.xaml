@@ -5,66 +5,148 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:lib="using:Microsoft.UI.Xaml.Controls"
     xmlns:controls1="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:controls="using:Unicord.Universal.Controls" 
     xmlns:user="using:Unicord.Universal.Controls.Users"
     mc:Ignorable="d">
 
-    <Grid x:Name="Root" Width="256" Margin="-12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid x:Name="Root" Width="320" Margin="-12">
+        <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="92"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <Grid RequestedTheme="Dark" Background="{ThemeResource SystemControlAccentDark1AcrylicElementAccentDark1Brush}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+                <Border Grid.Row="0"
+                        Background="{ThemeResource LayerFillColorAltBrush}"
+                        CornerRadius="8,8,0,0" />
 
-            <user:AvatarControl Style="{ThemeResource HugeAvatarWithPresenceStyle}"
-                                Width="128"
-                                Height="128"
-                                Margin="24,24,24,8"
-                                Source="{Binding AvatarUrl}"
-                                Presence="{Binding Presence}"/>
-            <StackPanel Grid.Row="1" RequestedTheme="Dark" >
-                <controls:UsernameControl User="{Binding}" FontSize="24" IconSize="24" HorizontalAlignment="Center" Margin="12,0" />
-                <TextBlock Foreground="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" TextAlignment="Center" FontSize="16" Margin="0,0,0,24">
-                    @<Run Foreground="{ThemeResource ApplicationForegroundThemeBrush}" Text="{Binding Username}"/>#<Run Text="{Binding Discriminator}"/>
-                </TextBlock>
-            </StackPanel>
-        </Grid>
-        
-        <!--<Grid Grid.Row="1" RequestedTheme="Dark" Visibility="{Binding Presence.Activity.Name, Converter={StaticResource HideOnNullConverter}, FallbackValue=Collapsed}" Background="{ThemeResource SystemControlAccentAcrylicElementAccentMediumHighBrush}" >
-            <controls:RichPresenceControl DataContext="{Binding Presence.Activity}" Margin="8" />
-        </Grid>-->
-        
-        <Grid Grid.Row="2" Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}">
-            <StackPanel Margin="12,8,12,12" Visibility="{Binding Roles, Converter={StaticResource BoolVisibilityConverter}, FallbackValue=Collapsed}">
-                <TextBlock x:Uid="/Dialogs/ProfileRoles" Style="{ThemeResource BaseTextBlockStyle}" Margin="0,0,0,8"/>
-                <ItemsControl ItemTemplate="{ThemeResource RoleTemplate}" ItemsSource="{Binding Roles}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <controls1:WrapPanel VerticalSpacing="4" HorizontalSpacing="4"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
-            </StackPanel>
-        </Grid>
+                <Button Grid.Row="0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Margin="0,8,8,0"
+                        Padding="6"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        ToolTipService.ToolTip="More">
+                    <FontIcon Glyph="&#xE10C;" FontFamily="{StaticResource SymbolThemeFontFamily}"/>
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="View full profile"
+                                            Command="{Binding OpenOverlayCommand}"
+                                            Click="ViewFullProfile_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE77B;" FontFamily="{StaticResource SymbolThemeFontFamily}"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem Text="Copy user ID" Click="CopyUserId_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE8C8;" FontFamily="{StaticResource SymbolThemeFontFamily}"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
 
-        <StackPanel HorizontalAlignment="Stretch" Grid.Row="3" Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}">
-            <controls:IconLabelButton Icon="&#xE7EE;" Tapped="IconLabelButton_Tapped" Command="{Binding OpenOverlayCommand}">
-                <TextBlock TextTrimming="CharacterEllipsis" x:Uid="/Flyouts/ShowFullProfile"/>
-            </controls:IconLabelButton>
-            <controls:IconLabelButton Icon="&#xE724;" Command="{Binding SendMessageCommand}">
-                <TextBlock TextTrimming="CharacterEllipsis" x:Uid="/Flyouts/SendMessage"/>
-            </controls:IconLabelButton>
-        </StackPanel>
-       
+                <Grid Grid.Row="1" Margin="16,0,16,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Width="76" Height="76" Margin="0,-38,0,0" HorizontalAlignment="Left">
+                        <Border CornerRadius="38"
+                                BorderBrush="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderThickness="6"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"/>
+                        <user:AvatarControl Margin="6"
+                                           Style="{ThemeResource LargeAvatarWithPresenceStyle}"
+                                           Source="{Binding AvatarUrl}"
+                                           Presence="{Binding Presence}"/>
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                   Text="{Binding DisplayName}"
+                                   TextWrapping="Wrap"
+                                   MaxLines="2"
+                                   IsTextSelectionEnabled="True"/>
+                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding Username}"
+                                   TextTrimming="CharacterEllipsis"
+                                   IsTextSelectionEnabled="True"/>
+                    </StackPanel>
+
+                    <HyperlinkButton Grid.Row="2"
+                                     Padding="0"
+                                     Margin="0,8,0,0"
+                                     HorizontalAlignment="Left"
+                                     Command="{Binding OpenOverlayCommand}"
+                                     Click="ViewFullProfile_Click"
+                                     Visibility="{Binding MutualGuilds, Converter={StaticResource BoolVisibilityConverter}, FallbackValue=Collapsed}">
+                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}">
+                            <Run Text="{Binding MutualGuilds.Count}"/>
+                            <Run Text=" mutual servers"/>
+                        </TextBlock>
+                    </HyperlinkButton>
+                </Grid>
+
+                <StackPanel Grid.Row="2"
+                            Margin="16,0,16,12"
+                            Visibility="{Binding Roles, Converter={StaticResource BoolVisibilityConverter}, FallbackValue=Collapsed}">
+                    <TextBlock x:Uid="/Dialogs/ProfileRoles"
+                               Style="{ThemeResource BaseTextBlockStyle}"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+                    <ItemsControl ItemTemplate="{ThemeResource RoleTemplate}"
+                                  ItemsSource="{Binding Roles}"
+                                  MaxHeight="96">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <controls1:WrapPanel VerticalSpacing="4" HorizontalSpacing="4"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+
+                <Grid Grid.Row="3" Margin="12,0,12,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Margin="0,0,4,0"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding OpenOverlayCommand}"
+                            Click="ViewFullProfile_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE77B;" FontSize="14"/>
+                            <TextBlock Text="Profile"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="1"
+                            Margin="4,0,0,0"
+                            HorizontalAlignment="Stretch"
+                            Style="{ThemeResource AccentButtonStyle}"
+                            Command="{Binding MessageCommand}"
+                            Click="SendMessage_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE8BD;" FontSize="14"/>
+                            <TextBlock Text="Message"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
     </Grid>
 </utilities:AdaptiveFlyout>
