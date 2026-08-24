@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -40,6 +41,7 @@ namespace Unicord.Universal.Models.Messages
         private UserViewModel _userViewModelCache;
         private bool _isSelected;
         private bool _isEditing;
+        private ObservableCollection<MessageViewModel> _groupingCollection;
 
         private MessageViewModel _referencedMessage;
         private MessageEditViewModel _editViewModel;
@@ -60,6 +62,8 @@ namespace Unicord.Universal.Models.Messages
             // we dont wanna do this for replies
             if (parentMessage == null)
             {
+                EnsureGroupingSubscription();
+
                 ReplyCommand = new ReplyCommand(this);
                 CopyMessageCommand = new CopyMessageCommand(this);
                 CopyUrlCommand = new CopyUrlCommand(this);
@@ -85,6 +89,54 @@ namespace Unicord.Universal.Models.Messages
                 WeakReferenceMessenger.Default.Register<MessageViewModel, MessageReactionsClearEventArgs>(this,
                     (t, e) => t.OnReactionsCleared(e.Event));
             }
+        }
+
+        /// <summary>
+        /// Message grouping is derived from the previous item in the channel list. The old
+        /// implementation only evaluated that relationship when the UI first bound State,
+        /// so deleting the first message of a group left the next message visually collapsed.
+        /// Listen for collection changes and invalidate the derived properties whenever the
+        /// neighborhood can have changed.
+        /// </summary>
+        private void EnsureGroupingSubscription()
+        {
+            if (Parent?.Messages == null)
+                return;
+
+            if (ReferenceEquals(_groupingCollection, Parent.Messages))
+                return;
+
+            if (_groupingCollection != null)
+                _groupingCollection.CollectionChanged -= OnParentMessagesChanged;
+
+            _groupingCollection = Parent.Messages;
+            _groupingCollection.CollectionChanged += OnParentMessagesChanged;
+        }
+
+        private void OnParentMessagesChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (Parent == null)
+                return;
+
+            // A removed item must unsubscribe or the old collection would keep the view model
+            // alive. Remaining/inserted items simply recompute their derived visual state.
+            if (Parent.Messages == null || !Parent.Messages.Contains(this))
+            {
+                if (_groupingCollection != null)
+                    _groupingCollection.CollectionChanged -= OnParentMessagesChanged;
+
+                _groupingCollection = null;
+                return;
+            }
+
+            EnsureGroupingSubscription();
+            RefreshGroupingState();
+        }
+
+        internal void RefreshGroupingState()
+        {
+            InvokePropertyChanged(nameof(IsCollapsed));
+            InvokePropertyChanged(nameof(State));
         }
 
         private List<EmbedViewModel> GetGroupedEmbeds(DiscordMessage message)
@@ -193,6 +245,10 @@ namespace Unicord.Universal.Models.Messages
             get
             {
                 if (Parent == null) return false;
+
+                // Messages can occasionally be replaced wholesale (for example after
+                // truncation/resume). Reattach lazily when State is next evaluated.
+                EnsureGroupingSubscription();
 
                 var index = Parent.Messages.IndexOf(this);
                 if (index > 0)
