@@ -7,8 +7,11 @@
          xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
          xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
-         IgnorableNamespaces="uap uap2 uap3 uap4 uap5 rescap">
+         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+         IgnorableNamespaces="uap mp uap2 uap3 uap4 uap5 rescap">
   <Identity Name="24101WamWooWamRD.Unicord" Publisher="CN=0F22111D-EDF0-42F0-B58D-26C4C5C5054B" Version="2.0.51.0" />
+  <!-- Required by the legacy UWP packaging toolchain; this does not re-enable Windows Mobile targeting. -->
+  <mp:PhoneIdentity PhoneProductId="5783aabf-3049-421f-ae1d-e88bd89018f2" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>ms-resource:AppDisplayName</DisplayName>
     <PublisherDisplayName>Wan Kerr Co. Ltd.</PublisherDisplayName>

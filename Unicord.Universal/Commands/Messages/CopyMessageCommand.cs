@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AppCenter.Analytics;
+﻿using Microsoft.AppCenter.Analytics;
 using Unicord.Universal.Models.Messages;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -14,18 +13,13 @@ namespace Unicord.Universal.Commands.Messages
         public override void Execute(object parameter)
         {
             Analytics.TrackEvent("CopyMessageCommand_Invoked");
-            var message = viewModel.Message;
 
-            var package = new DataPackage();
-            package.RequestedOperation = DataPackageOperation.Copy | DataPackageOperation.Link;
+            var package = new DataPackage
+            {
+                RequestedOperation = DataPackageOperation.Copy
+            };
 
-            var serverText = message.Channel.Guild != null ? message.Channel.GuildId.ToString() : "@me";
-            var uri = "https://" + $"discordapp.com/channels/{serverText}/{message.ChannelId}/{message.Id}/";
-
-            package.SetText(message.Content);
-            package.SetWebLink(new Uri(uri));
-            package.SetRtf($"{{\\field{{\\*\\fldinst HYPERLINK \"{uri}\"}}{{\fldrslt {message.Content}}}");
-
+            package.SetText(viewModel.Message.Content ?? string.Empty);
             Clipboard.SetContent(package);
         }
     }
