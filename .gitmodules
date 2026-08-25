@@ -1,15 +1,9 @@
 [submodule "Libraries/WamWooWam.Core"]
 	path = Libraries/WamWooWam.Core
-	url = https://github.com/WamWooWam/WamWooWam.Core
-[submodule "Libraries/MomentSharp"]
-	path = Libraries/MomentSharp
-	url = https://github.com/WamWooWam/MomentSharp
-[submodule "Libraries/DSharpPlus"]
-	path = Libraries/DSharpPlus
-	url = https://github.com/UnicordDev/DSharpPlus-Unicord/
-[submodule "Libraries/unicode.net"]
-	path = Libraries/unicode.net
-	url = https://github.com/wamwoowam/unicode.net
+	url = https://github.com/UnicordDev/WamWooWam.Core.git
 [submodule "Libraries/WindowsCommunityToolkit"]
 	path = Libraries/WindowsCommunityToolkit
-	url = https://github.com/UnicordDev/WindowsCommunityToolkit
+	url = https://github.com/UnicordDev/WindowsCommunityToolkit.git
+[submodule "Libraries/DSharpPlus"]
+	path = Libraries/DSharpPlus
+	url = https://github.com/Luisinhi010/DSharpPlus-Unicord.git
