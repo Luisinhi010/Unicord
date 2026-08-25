@@ -26,33 +26,35 @@
         <models:DiscordPageViewModel/>
     </Page.DataContext>
     <Page.Resources>
-        <!--
-            Windows owns the navigation chrome through Mica; Discord owns the content surface.
-            The chat brush is intentionally isolated so account/Nitro themes can replace it later
-            without recolouring the server/channel/member navigation surfaces.
-        -->
-        <ResourceDictionary.ThemeDictionaries>
-            <ResourceDictionary x:Key="Default">
-                <SolidColorBrush x:Key="DiscordShell_ChatSurfaceBrush" Color="#FF313338"/>
-                <SolidColorBrush x:Key="DiscordShell_NavigationSurfaceBrush" Color="Transparent"/>
-                <SolidColorBrush x:Key="DiscordShell_NavigationStrokeBrush" Color="#20FFFFFF"/>
-                <SolidColorBrush x:Key="DiscordShell_ChatStrokeBrush" Color="#28FFFFFF"/>
-            </ResourceDictionary>
-            <ResourceDictionary x:Key="Light">
-                <SolidColorBrush x:Key="DiscordShell_ChatSurfaceBrush" Color="#FFFFFFFF"/>
-                <SolidColorBrush x:Key="DiscordShell_NavigationSurfaceBrush" Color="Transparent"/>
-                <SolidColorBrush x:Key="DiscordShell_NavigationStrokeBrush" Color="#18000000"/>
-                <SolidColorBrush x:Key="DiscordShell_ChatStrokeBrush" Color="#20000000"/>
-            </ResourceDictionary>
-        </ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary>
+            <!--
+                Windows owns the navigation chrome through Mica; Discord owns the content surface.
+                The chat brush is intentionally isolated so account/Nitro themes can replace it later
+                without recolouring the server/channel/member navigation surfaces.
+            -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="DiscordShell_ChatSurfaceBrush" Color="#FF313338"/>
+                    <SolidColorBrush x:Key="DiscordShell_NavigationSurfaceBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="DiscordShell_NavigationStrokeBrush" Color="#20FFFFFF"/>
+                    <SolidColorBrush x:Key="DiscordShell_ChatStrokeBrush" Color="#28FFFFFF"/>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="DiscordShell_ChatSurfaceBrush" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="DiscordShell_NavigationSurfaceBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="DiscordShell_NavigationStrokeBrush" Color="#18000000"/>
+                    <SolidColorBrush x:Key="DiscordShell_ChatStrokeBrush" Color="#20000000"/>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
 
-        <CircleEase x:Key="Ease" EasingMode="EaseInOut" />
+            <CircleEase x:Key="Ease" EasingMode="EaseInOut" />
 
-        <Style x:Key="SeparatorStyle" TargetType="Border">
-            <Setter Property="Margin" Value="16,8"/>
-            <Setter Property="BorderThickness" Value="0,1,0,0"/>
-            <Setter Property="BorderBrush" Value="{ThemeResource DiscordPage_Separator_BorderBrush}"/>
-        </Style>
+            <Style x:Key="SeparatorStyle" TargetType="Border">
+                <Setter Property="Margin" Value="16,8"/>
+                <Setter Property="BorderThickness" Value="0,1,0,0"/>
+                <Setter Property="BorderBrush" Value="{ThemeResource DiscordPage_Separator_BorderBrush}"/>
+            </Style>
+        </ResourceDictionary>
     </Page.Resources>
     <Grid>
         <Grid x:Name="TitleBarGrid"
