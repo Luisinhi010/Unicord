@@ -9,6 +9,7 @@ using Unicord.Universal.Parsers.Markdown.Render;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Documents;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 
 namespace Unicord.Universal.Controls.Markdown.Render
@@ -84,6 +85,12 @@ namespace Unicord.Universal.Controls.Markdown.Render
                 IsTextSelectionEnabled = IsTextSelectionEnabled,
                 TextWrapping = TextWrapping
             };
+
+            // Preserve normal desktop text selection, but don't let RichTextBlock replace the
+            // message's context menu with its built-in "Copy all" menu. Route the context
+            // request to the first ancestor that owns a ContextFlyout (the message surface).
+            result.ContextRequested += Markdown_ContextRequested;
+
             localContext.BlockUIElementCollection?.Add(result);
 
             return result;
@@ -107,7 +114,26 @@ namespace Unicord.Universal.Controls.Markdown.Render
                 IsTextSelectionEnabled = IsTextSelectionEnabled,
                 TextWrapping = TextWrapping
             };
+
+            result.ContextRequested += Markdown_ContextRequested;
             return result;
+        }
+
+        private static void Markdown_ContextRequested(UIElement sender, ContextRequestedEventArgs args)
+        {
+            DependencyObject current = sender;
+
+            while (current != null)
+            {
+                if (current is FrameworkElement element && element.ContextFlyout != null)
+                {
+                    element.ContextFlyout.ShowAt(element);
+                    args.Handled = true;
+                    return;
+                }
+
+                current = VisualTreeHelper.GetParent(current);
+            }
         }
 
         /// <summary>

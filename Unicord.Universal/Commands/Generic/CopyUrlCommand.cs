@@ -12,6 +12,7 @@ namespace Unicord.Universal.Commands.Generic
     public class CopyUrlCommand : ICommand
     {
         private readonly ViewModelBase viewModel;
+
         public CopyUrlCommand(ViewModelBase viewModel)
         {
             this.viewModel = viewModel;
@@ -32,7 +33,7 @@ namespace Unicord.Universal.Commands.Generic
             {
                 Analytics.TrackEvent("CopyUrlCommand_CopyMessageLink");
                 var serverText = message.Channel.Guild != null ? message.Channel.Guild.Id.ToString() : "@me";
-                var url = "https://" + $"discordapp.com/channels/{serverText}/{message.Channel.Id}/{message.Id}";
+                var url = $"https://discord.com/channels/{serverText}/{message.Channel.Id}/{message.Id}";
                 package.SetText(url);
                 package.SetWebLink(new Uri(url));
             }
@@ -41,7 +42,7 @@ namespace Unicord.Universal.Commands.Generic
             {
                 Analytics.TrackEvent("CopyUrlCommand_CopyChannelLink");
                 var serverText = channel.Guild != null ? channel.Guild.Id.ToString() : "@me";
-                var url = "https://" + $"discordapp.com/channels/{serverText}/{channel.Id}";
+                var url = $"https://discord.com/channels/{serverText}/{channel.Id}";
                 package.SetText(url);
                 package.SetWebLink(new Uri(url));
             }
@@ -49,7 +50,7 @@ namespace Unicord.Universal.Commands.Generic
             if (viewModel is GuildViewModel guild)
             {
                 Analytics.TrackEvent("CopyUrlCommand_CopyGuildLink");
-                var url = "https://" + $"discordapp.com/channels/{guild.Id}";
+                var url = $"https://discord.com/channels/{guild.Id}";
                 package.SetText(url);
                 package.SetWebLink(new Uri(url));
             }
