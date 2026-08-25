@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:lib="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls="using:Unicord.Universal.Controls"
     xmlns:users="using:Unicord.Universal.Controls.Users"
     xmlns:guild="using:Unicord.Universal.Models.Guild"
     x:DefaultBindMode="OneWay"
@@ -104,11 +105,11 @@
                                         </Grid>
 
                                         <StackPanel Grid.Row="1" Margin="0,12,0,0">
-                                            <TextBlock Style="{ThemeResource TitleTextBlockStyle}"
-                                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                       Text="{x:Bind User.DisplayName, TargetNullValue='Display name'}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       IsTextSelectionEnabled="True"/>
+                                            <controls:UsernameControl User="{x:Bind User}"
+                                                                      FontSize="24"
+                                                                      FontWeight="SemiBold"
+                                                                      IconSize="16"
+                                                                      HorizontalAlignment="Left"/>
                                             <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                        Text="{x:Bind User.Username}"
