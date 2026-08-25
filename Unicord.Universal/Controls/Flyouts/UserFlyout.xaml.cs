@@ -1,5 +1,7 @@
-﻿using Unicord.Universal.Utilities;
-using Windows.UI.Xaml.Input;
+﻿using Unicord.Universal.Models.User;
+using Unicord.Universal.Utilities;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.UI.Xaml;
 
 namespace Unicord.Universal.Controls.Flyouts
 {
@@ -10,10 +12,24 @@ namespace Unicord.Universal.Controls.Flyouts
             InitializeComponent();
         }
 
-        // i dislike this
-        private void IconLabelButton_Tapped(object sender, TappedRoutedEventArgs e)
+        private void ViewFullProfile_Click(object sender, RoutedEventArgs e)
         {
+            CloseHostFlyout();
+        }
 
+        private void SendMessage_Click(object sender, RoutedEventArgs e)
+        {
+            CloseHostFlyout();
+        }
+
+        private void CopyUserId_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not UserViewModel user)
+                return;
+
+            var package = new DataPackage();
+            package.SetText(user.Id.ToString());
+            Clipboard.SetContent(package);
         }
     }
 }

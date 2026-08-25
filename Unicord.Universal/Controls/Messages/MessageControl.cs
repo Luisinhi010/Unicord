@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Windows.Input;
+using Unicord.Universal.Controls;
+using Unicord.Universal.Controls.Flyouts;
 using Unicord.Universal.Models.Messages;
+using Unicord.Universal.Utilities;
 using Windows.Devices.Input;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
@@ -18,6 +22,10 @@ namespace Unicord.Universal.Controls.Messages
         private Grid _messageSurface;
         private Border _hoverHighlight;
         private Border _quickActions;
+        private FrameworkElement _profileAvatarTarget;
+        private FrameworkElement _profileUsernameTarget;
+        private FrameworkElement _replyAvatarTarget;
+        private FrameworkElement _replyUsernameTarget;
 
         #region Dependency Properties
 
@@ -53,12 +61,14 @@ namespace Unicord.Universal.Controls.Messages
         {
             base.OnApplyTemplate();
             ResetDesktopChrome();
+            WireProfileFlyoutTargets();
         }
 
         protected virtual void OnMessageChanged(DependencyPropertyChangedEventArgs e)
         {
             ResetDesktopChrome();
             ApplyTemplate();
+            WireProfileFlyoutTargets();
 
             if (e.NewValue is MessageViewModel message)
             {
@@ -97,6 +107,7 @@ namespace Unicord.Universal.Controls.Messages
         private void MessageControl_Unloaded(object sender, RoutedEventArgs e)
         {
             HideDesktopChrome();
+            UnwireProfileFlyoutTargets();
         }
 
         private void EnsureDesktopChrome()
@@ -194,6 +205,64 @@ namespace Unicord.Universal.Controls.Messages
             _messageSurface.ContextFlyout.ShowAt(target);
         }
 
+        private void WireProfileFlyoutTargets()
+        {
+            UnwireProfileFlyoutTargets();
+
+            _profileAvatarTarget = GetTemplateChild("ImageContainer") as FrameworkElement;
+            var authorContainer = GetTemplateChild("AuthorContainer") as DependencyObject;
+            _profileUsernameTarget = FindDescendant<UsernameControl>(authorContainer);
+
+            _replyAvatarTarget = GetTemplateChild("ReplyAvatarContainer") as FrameworkElement;
+            var referencedContainer = GetTemplateChild("ReferencedMessageContainer") as DependencyObject;
+            _replyUsernameTarget = FindDescendant<UsernameControl>(referencedContainer);
+
+            if (_profileAvatarTarget != null)
+                _profileAvatarTarget.Tapped += ProfileTarget_Tapped;
+            if (_profileUsernameTarget != null)
+                _profileUsernameTarget.Tapped += ProfileTarget_Tapped;
+            if (_replyAvatarTarget != null)
+                _replyAvatarTarget.Tapped += ReplyProfileTarget_Tapped;
+            if (_replyUsernameTarget != null)
+                _replyUsernameTarget.Tapped += ReplyProfileTarget_Tapped;
+        }
+
+        private void UnwireProfileFlyoutTargets()
+        {
+            if (_profileAvatarTarget != null)
+                _profileAvatarTarget.Tapped -= ProfileTarget_Tapped;
+            if (_profileUsernameTarget != null)
+                _profileUsernameTarget.Tapped -= ProfileTarget_Tapped;
+            if (_replyAvatarTarget != null)
+                _replyAvatarTarget.Tapped -= ReplyProfileTarget_Tapped;
+            if (_replyUsernameTarget != null)
+                _replyUsernameTarget.Tapped -= ReplyProfileTarget_Tapped;
+
+            _profileAvatarTarget = null;
+            _profileUsernameTarget = null;
+            _replyAvatarTarget = null;
+            _replyUsernameTarget = null;
+        }
+
+        private void ProfileTarget_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if (MessageViewModel?.Author == null || sender is not FrameworkElement target)
+                return;
+
+            AdaptiveFlyoutUtilities.ShowAdaptiveFlyout<UserFlyout>(MessageViewModel.Author, target, FlyoutPlacementMode.Right);
+            e.Handled = true;
+        }
+
+        private void ReplyProfileTarget_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            var author = MessageViewModel?.ReferencedMessage?.Author;
+            if (author == null || sender is not FrameworkElement target)
+                return;
+
+            AdaptiveFlyoutUtilities.ShowAdaptiveFlyout<UserFlyout>(author, target, FlyoutPlacementMode.Right);
+            e.Handled = true;
+        }
+
         private void HideDesktopChrome()
         {
             if (_hoverHighlight != null)
@@ -208,6 +277,8 @@ namespace Unicord.Universal.Controls.Messages
 
         private void ResetDesktopChrome()
         {
+            UnwireProfileFlyoutTargets();
+
             if (_messageSurface != null)
             {
                 if (_hoverHighlight != null)
@@ -235,6 +306,26 @@ namespace Unicord.Universal.Controls.Messages
                     return element;
 
                 var nested = FindDescendantByName<T>(child, name);
+                if (nested != null)
+                    return nested;
+            }
+
+            return null;
+        }
+
+        private static T FindDescendant<T>(DependencyObject root) where T : DependencyObject
+        {
+            if (root == null)
+                return null;
+
+            var count = VisualTreeHelper.GetChildrenCount(root);
+            for (var i = 0; i < count; i++)
+            {
+                var child = VisualTreeHelper.GetChild(root, i);
+                if (child is T typed)
+                    return typed;
+
+                var nested = FindDescendant<T>(child);
                 if (nested != null)
                     return nested;
             }
