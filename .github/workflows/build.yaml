@@ -5,7 +5,7 @@ name: Build
 on:
   workflow_dispatch:
   push:
-    branches: [ desktop-qol, profile-qol ]
+    branches: [ desktop-qol, profile-qol, mica-chat-shell ]
 
 jobs:
 
@@ -133,6 +133,6 @@ jobs:
     - name: Upload Appx Package
       uses: actions/upload-artifact@v4
       with:
-        name: AppxPackage-${{ env.Appx_Bundle_Version }}-${{ matrix.configuration }}-ProfileQoL-Win11-x64
+        name: AppxPackage-${{ env.Appx_Bundle_Version }}-${{ matrix.configuration }}-MicaChatShell-Win11-x64
         path: |
           ${{ env.Project_Name }}\Packages
