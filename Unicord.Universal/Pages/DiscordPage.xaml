@@ -17,6 +17,7 @@
     xmlns:ui="using:Microsoft.Toolkit.Uwp.UI" 
     xmlns:messagesVMs="using:Unicord.Universal.Models.Messages"
     xmlns:w1903="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractPresent(Windows.Foundation.UniversalApiContract,8)"
+    lib:BackdropMaterial.ApplyToRootOrPageBackground="True"
     NavigationCacheMode="Required"
     Loaded="Page_Loaded"
     Unloaded="Page_Unloaded"
@@ -25,6 +26,26 @@
         <models:DiscordPageViewModel/>
     </Page.DataContext>
     <Page.Resources>
+        <!--
+            Windows owns the navigation chrome through Mica; Discord owns the content surface.
+            The chat brush is intentionally isolated so account/Nitro themes can replace it later
+            without recolouring the server/channel/member navigation surfaces.
+        -->
+        <ResourceDictionary.ThemeDictionaries>
+            <ResourceDictionary x:Key="Default">
+                <SolidColorBrush x:Key="DiscordShell_ChatSurfaceBrush" Color="#FF313338"/>
+                <SolidColorBrush x:Key="DiscordShell_NavigationSurfaceBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="DiscordShell_NavigationStrokeBrush" Color="#20FFFFFF"/>
+                <SolidColorBrush x:Key="DiscordShell_ChatStrokeBrush" Color="#28FFFFFF"/>
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="Light">
+                <SolidColorBrush x:Key="DiscordShell_ChatSurfaceBrush" Color="#FFFFFFFF"/>
+                <SolidColorBrush x:Key="DiscordShell_NavigationSurfaceBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="DiscordShell_NavigationStrokeBrush" Color="#18000000"/>
+                <SolidColorBrush x:Key="DiscordShell_ChatStrokeBrush" Color="#20000000"/>
+            </ResourceDictionary>
+        </ResourceDictionary.ThemeDictionaries>
+
         <CircleEase x:Key="Ease" EasingMode="EaseInOut" />
 
         <Style x:Key="SeparatorStyle" TargetType="Border">
@@ -37,7 +58,7 @@
         <Grid x:Name="TitleBarGrid"
               VerticalAlignment="Top" 
               Height="32"
-              Background="{ThemeResource DiscordPage_PrimarySidebar_BackgroundBrush}">
+              Background="Transparent">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="72"/>
                 <ColumnDefinition Width="*"/>
@@ -89,7 +110,7 @@
 
                 <Grid x:Name="sidebarMainGrid" 
                       Margin="0,32,0,0"
-                      Background="{ThemeResource DiscordPage_PrimarySidebar_BackgroundBrush}">
+                      Background="{ThemeResource DiscordShell_NavigationSurfaceBrush}">
                     <ScrollViewer IsVerticalScrollChainingEnabled="True">
                         <StackPanel Padding="0,0,0,68">
                             <ListViewItem x:Name="CloseItem"
@@ -211,8 +232,8 @@
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
 
-                        <Grid Background="{ThemeResource DiscordPage_SecondaryGrid_Background}"
-                              BorderBrush="{ThemeResource DiscordPage_SecondaryGrid_BorderBrush}"
+                        <Grid Background="{ThemeResource DiscordShell_NavigationSurfaceBrush}"
+                              BorderBrush="{ThemeResource DiscordShell_NavigationStrokeBrush}"
                               BorderThickness="{ThemeResource DiscordPage_SecondaryGrid_BorderThickness}"
                               CornerRadius="{ThemeResource DiscordPage_SecondaryGrid_CornerRadius}"
                               Margin="{ThemeResource DiscordPage_SecondaryGrid_SplitMargin}">
@@ -221,8 +242,8 @@
 
                         <Grid Grid.Row="1"
                               Margin="{ThemeResource DiscordPage_SecondaryGrid_SplitMargin}"
-                              Background="{ThemeResource DiscordPage_SecondaryGrid_Background}"
-                              BorderBrush="{ThemeResource DiscordPage_SecondaryGrid_BorderBrush}"
+                              Background="{ThemeResource DiscordShell_NavigationSurfaceBrush}"
+                              BorderBrush="{ThemeResource DiscordShell_NavigationStrokeBrush}"
                               BorderThickness="{ThemeResource DiscordPage_SecondaryGrid_BorderThickness}"
                               CornerRadius="{ThemeResource DiscordPage_SecondaryGrid_CornerRadius}"
                               Visibility="{Binding VoiceModel, Converter={StaticResource HideOnNullConverter}, FallbackValue=Collapsed}">
@@ -279,8 +300,8 @@
                   MinWidth="250"
                   Style="{StaticResource DiscordPage_RightMainGridStyle}"
                   CornerRadius="{ThemeResource DiscordPage_MainContent_CornerRadius}"
-                  Background="{ThemeResource DiscordPage_MainContent_Background}"
-                  BorderBrush="{ThemeResource DiscordPage_MainContent_BorderBrush}"
+                  Background="{ThemeResource DiscordShell_ChatSurfaceBrush}"
+                  BorderBrush="{ThemeResource DiscordShell_ChatStrokeBrush}"
                   BorderThickness="{ThemeResource DiscordPage_MainContent_BorderThickness}">
                 <Frame x:Name="mainFrame"
                        HorizontalAlignment="Stretch"
@@ -314,8 +335,8 @@
                   Grid.Column="2"                  
                   Width="292"
                   Margin="0,32,0,0">
-                <Grid Background="{ThemeResource DiscordPage_RightSplitPaneGrid_Background}"
-                      BorderBrush="{ThemeResource DiscordPage_RightSplitPaneGrid_BorderBrush}"
+                <Grid Background="{ThemeResource DiscordShell_NavigationSurfaceBrush}"
+                      BorderBrush="{ThemeResource DiscordShell_NavigationStrokeBrush}"
                       BorderThickness="{ThemeResource DiscordPage_RightSplitPaneGrid_BorderThickness}"
                       CornerRadius="{ThemeResource DiscordPage_RightSplitPaneGrid_CornerRadius}"
                       Margin="{ThemeResource DiscordPage_RightSplitPaneGrid_Margin}"
