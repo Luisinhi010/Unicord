@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls1="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:controls="using:Unicord.Universal.Controls"
     xmlns:user="using:Unicord.Universal.Controls.Users"
     mc:Ignorable="d">
 
@@ -72,12 +73,11 @@
                     </Grid>
 
                     <StackPanel Grid.Row="1" Margin="0,10,0,0">
-                        <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}"
-                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                   Text="{Binding DisplayName}"
-                                   TextWrapping="Wrap"
-                                   MaxLines="2"
-                                   IsTextSelectionEnabled="True"/>
+                        <controls:UsernameControl User="{Binding}"
+                                                  FontSize="20"
+                                                  FontWeight="SemiBold"
+                                                  IconSize="14"
+                                                  HorizontalAlignment="Left"/>
                         <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{Binding Username}"
