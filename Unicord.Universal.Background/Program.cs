@@ -15,7 +15,12 @@ namespace Unicord.Universal.Background
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new NotificationApplicationContext());
+
+            var context = new NotificationApplicationContext();
+            if (!context.CanRun)
+                return;
+
+            Application.Run(context);
         }
     }
 }
