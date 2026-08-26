@@ -31,6 +31,8 @@ namespace Unicord.Universal.Background
         private Task _connectTask;
         private string _token = null;
 
+        public bool CanRun { get; private set; }
+
         private static readonly FieldInfo _windowField
             = typeof(NotifyIcon).GetField("window", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -44,11 +46,9 @@ namespace Unicord.Universal.Background
             // fail closed and simply do not start background Discord connectivity.
             CredentialStore.DeleteLegacyPlaintextToken();
             if (!CredentialStore.TryGetToken(out _token))
-            {
-                ExitThread();
                 return;
-            }
 
+            CanRun = true;
             _notifyIcon = new NotifyIcon();
             _notifyIcon.Icon = Properties.Resources.TrayIcon;
             _notifyIcon.Text = "Unicord";
