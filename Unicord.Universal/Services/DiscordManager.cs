@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Unicord.Universal.Dialogs;
 using Unicord.Universal.Models.Messaging;
 using Windows.ApplicationModel.Core;
-using Windows.Security.Credentials;
 using Windows.UI.Core;
 
 namespace Unicord.Universal.Services
@@ -17,24 +16,33 @@ namespace Unicord.Universal.Services
     internal class DiscordManager
     {
         private static DiscordClient _discord;
-        private static ILogger<DiscordManager> _logger
+        private static readonly ILogger<DiscordManager> _logger
             = Logger.GetLogger<DiscordManager>();
 
         private static readonly SemaphoreSlim _connectSemaphore
             = new SemaphoreSlim(1);
         private static TaskCompletionSource<ReadyEventArgs> _readySource
             = new TaskCompletionSource<ReadyEventArgs>();
-        public static DiscordClient Discord
-        {
-            get => _discord;
-        }
+
+        public static DiscordClient Discord => _discord;
 
         internal static void KickoffConnectionAsync()
         {
+            CredentialStore.DeleteLegacyPlaintextToken();
+
             _ = Task.Run(async () =>
             {
                 if (TryGetToken(out var token))
-                    await LoginAsync(token, null, null, true);
+                {
+                    try
+                    {
+                        await LoginAsync(token, null, null, true);
+                    }
+                    finally
+                    {
+                        token = null;
+                    }
+                }
             });
         }
 
@@ -47,6 +55,9 @@ namespace Unicord.Universal.Services
         {
             await _connectSemaphore.WaitAsync();
             _readySource = new TaskCompletionSource<ReadyEventArgs>();
+
+            CredentialStore.DeleteLegacyPlaintextToken();
+
             try
             {
                 if (Discord != null)
@@ -80,16 +91,19 @@ namespace Unicord.Universal.Services
                 {
                     async Task ReadyHandler(DiscordClient sender, ReadyEventArgs e)
                     {
-                        // TODO: find a way to save this more securely, the background process can't retrieve from the credential locker?
-                        App.LocalSettings.Save("Token", token);
+                        // Persist only after a successful foreground login. If Discord rotated
+                        // the token before Ready, AuthTokenUpdate has already stored the newer
+                        // credential, so do not overwrite it with the original value.
+                        if (!background && !CredentialStore.ContainsToken())
+                            CredentialStore.StoreToken(token);
+
                         sender.Ready -= ReadyHandler;
                         sender.SocketErrored -= SocketErrored;
                         sender.ClientErrored -= ClientErrored;
                         _readySource.TrySetResult(e);
+
                         if (onReady != null)
-                        {
                             await onReady(sender, e);
-                        }
 
                         onError = null;
                     }
@@ -101,8 +115,7 @@ namespace Unicord.Universal.Services
                         sender.ClientErrored -= ClientErrored;
 
                         Logger.LogError(e.Exception);
-
-                        _readySource.SetException(e.Exception);
+                        _readySource.TrySetException(e.Exception);
                         return Task.CompletedTask;
                     }
 
@@ -113,8 +126,7 @@ namespace Unicord.Universal.Services
                         sender.ClientErrored -= ClientErrored;
 
                         Logger.LogError(e.Exception);
-
-                        _readySource.SetException(e.Exception);
+                        _readySource.TrySetException(e.Exception);
                         return Task.CompletedTask;
                     }
 
@@ -134,14 +146,18 @@ namespace Unicord.Universal.Services
 
                     DiscordClientMessenger.Register(Discord);
 
-                    await Discord.ConnectAsync(status: status,
+                    await Discord.ConnectAsync(
+                        status: status,
                         idlesince: SystemPlatform.Desktop ? null : DateTimeOffset.Now);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failure when logging in!");
-                    Tools.ResetPasswordVault();
+                    // Do not erase a previously validated credential for a transient
+                    // network, TLS, socket, or Credential Locker failure. Foreground
+                    // authentication failures flow through App.LoginError/LogoutAsync.
                     _readySource.TrySetException(ex);
+
                     if (onError != null)
                         await onError(ex);
                 }
@@ -154,20 +170,10 @@ namespace Unicord.Universal.Services
 
         private static Task OnDiscordTokenUpdated(DiscordClient sender, AuthTokenUpdatedEventArgs args)
         {
-            var vault = new PasswordVault();
-            try
-            {
-                foreach (var c in vault.FindAllByResource(Constants.TOKEN_IDENTIFIER))
-                    vault.Remove(c);
-            }
-            catch { }
-
-            var newToken = new PasswordCredential(Constants.TOKEN_IDENTIFIER, "Default", args.Token);
-            vault.Add(newToken);
-
-            // ditto above about the background process
-            App.LocalSettings.Save("Token", args.Token);
-
+            // Discord may rotate the credential. Stage and verify the replacement
+            // before retiring the previous protected entry.
+            CredentialStore.StoreToken(args.Token);
+            CredentialStore.DeleteLegacyPlaintextToken();
             return Task.CompletedTask;
         }
 
@@ -187,12 +193,15 @@ namespace Unicord.Universal.Services
 
         internal static async Task LogoutAsync()
         {
-            if (Discord == null) return;
+            if (Discord == null)
+                return;
 
             var discord = _discord;
             try
             {
                 DiscordClientMessenger.Unregister(discord);
+                discord.AuthTokenUpdate -= OnDiscordTokenUpdated;
+                discord.CaptchaRequested -= OnDiscordCaptchaRequested;
                 await discord.DisconnectAsync();
                 discord.Dispose();
             }
@@ -208,19 +217,8 @@ namespace Unicord.Universal.Services
 
         internal static bool TryGetToken(out string token)
         {
-            try
-            {
-                var passwordVault = new PasswordVault();
-                var credential = passwordVault.Retrieve(Constants.TOKEN_IDENTIFIER, "Default");
-                credential.RetrievePassword();
-
-                token = credential.Password;
-                return true;
-            }
-            catch { }
-
-            token = null;
-            return false;
+            CredentialStore.DeleteLegacyPlaintextToken();
+            return CredentialStore.TryGetToken(out token);
         }
     }
 }
