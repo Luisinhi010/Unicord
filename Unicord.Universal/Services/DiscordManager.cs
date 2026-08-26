@@ -56,13 +56,6 @@ namespace Unicord.Universal.Services
             await _connectSemaphore.WaitAsync();
             _readySource = new TaskCompletionSource<ReadyEventArgs>();
 
-            if (!background)
-            {
-                // A foreground login is a new credential attempt. Do not leave a stale
-                // credential in the vault while validating a replacement.
-                CredentialStore.DeleteToken();
-            }
-
             CredentialStore.DeleteLegacyPlaintextToken();
 
             try
@@ -160,7 +153,9 @@ namespace Unicord.Universal.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Failure when logging in!");
-                    CredentialStore.DeleteToken();
+                    // Do not erase a previously validated credential for a transient
+                    // network, TLS, socket, or Credential Locker failure. Foreground
+                    // authentication failures flow through App.LoginError/LogoutAsync.
                     _readySource.TrySetException(ex);
 
                     if (onError != null)
@@ -175,8 +170,8 @@ namespace Unicord.Universal.Services
 
         private static Task OnDiscordTokenUpdated(DiscordClient sender, AuthTokenUpdatedEventArgs args)
         {
-            // Discord may rotate the credential. Replace the previous protected entry
-            // atomically from the app's point of view; never mirror it into LocalSettings.
+            // Discord may rotate the credential. Stage and verify the replacement
+            // before retiring the previous protected entry.
             CredentialStore.StoreToken(args.Token);
             CredentialStore.DeleteLegacyPlaintextToken();
             return Task.CompletedTask;
